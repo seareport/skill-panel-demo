@@ -40,9 +40,13 @@ def stacked_hist(plot, element):
     plot.handles["plot"].y_range.reset_end = max(offset) * 1.1
 
 
-def hist_(src, z, g="ocean", map=None):
-    if z in ["rmse", "rms", "bias"]:
+def hist_(src, z, g="ocean", map=None, type="violin"):
+    if z in ["rmse", "rms", "mad", "madp"]:
         range_ = (0, 0.5)
+    elif z in ["bias"]:
+        range_ = (-0.2, 0.2)
+    elif z in ["R1", "R3"]:
+        range_ = (-1, 1)
     else:
         range_ = (0, 1)
 
@@ -55,7 +59,6 @@ def hist_(src, z, g="ocean", map=None):
         new_row = {group: np.nan for group in unique_oceans}
         new_row[row[g]] = row[z]
         rows.append(new_row)
-    one_hot_df = pd.DataFrame(rows, columns=unique_oceans)
     #
     mean = src[z].mean()
     color_key = hv.Cycle("Category20").values
@@ -66,9 +69,37 @@ def hist_(src, z, g="ocean", map=None):
             for i, ocean in enumerate(unique_oceans)
         }
     colors = [map[ocean] for ocean in unique_oceans]
-    return one_hot_df.hvplot.hist(
-        bins=25,
-        bin_range=range_,
-        # cmap = ocean_mapping,
-        color=colors,
-    ).opts(hooks=[stacked_hist], title=f"{z} mean: {mean:.2f}")
+    if type == "violin":
+        return hv.Violin(
+            df,
+            g,
+            z,
+        ).opts(
+            violin_fill_color=g,
+            cmap=map,
+            invert_axes=True,
+            ylim=range_,
+            title=f"{z} mean: {mean:.2f}",
+        )
+    elif type == "box":
+        return hv.BoxWhisker(
+            df,
+            g,
+            z,
+        ).opts(
+            box_color=g,
+            cmap=map,
+            invert_axes=True,
+            outlier_radius=0.001,
+            ylim=range_,
+            title=f"{z} mean: {mean:.2f}",
+        )
+    else:
+        one_hot_df = pd.DataFrame(rows, columns=unique_oceans)
+
+        return one_hot_df.hvplot.hist(
+            bins=20,
+            bin_range=range_,
+            # cmap = ocean_mapping,
+            color=colors,
+        ).opts(hooks=[stacked_hist], title=f"{z} mean: {mean:.2f}")

@@ -26,6 +26,9 @@ TMAX = "2023-12-31"
 VERSIONS = {
     "Global 50km": "v0",
     "Global 20km": "v0.2",
+    "Global 7km": "v1.2",
+    "Global 3km, L5 GSSHS": "v2.1",
+    "Global 3km, L6 GSSHS": "v2.2",
     # Add other versions here
 }
 
@@ -61,6 +64,12 @@ PARAMS = {
     "Error on peaks >99th percentile": "error99m",
 }
 
+PLOT_TYPE = {
+    "Violin Plot": "violin",
+    "Box Plot": "box",
+    "Histogram": "hist",
+}
+
 
 def load_data() -> pd.DataFrame:
     seaset = pd.read_csv(
@@ -92,6 +101,7 @@ def find_ocean_for_station(
 class Dashboard(param.Parameterized):
     version = param.Selector(objects=VERSIONS)
     parameter = param.Selector(objects=PARAMS)
+    plot_type = param.Selector(objects=PLOT_TYPE)
     selected_station = param.Integer(default=0)
 
     def __init__(self, **params):
@@ -160,11 +170,17 @@ class Dashboard(param.Parameterized):
             )
         return diagram.opts(**PLOT_OPTS["taylor_view"], shared_axes=False)
 
-    @param.depends("version", "parameter")
+    @param.depends("version", "parameter", "plot_type")
     def hist(self):
         # Update the DataFrame based on the selected version
         self.update_data()
-        hist = hist_(self.df, self.parameter, g="ocean", map=self.ocean_mapping)
+        hist = hist_(
+            self.df,
+            self.parameter,
+            g="ocean",
+            map=self.ocean_mapping,
+            type=self.plot_type,
+        )
         return hist.opts(
             shared_axes=False,
             **PLOT_OPTS["hist_view"],
@@ -177,7 +193,11 @@ class Dashboard(param.Parameterized):
 dashboard = Dashboard()
 layout = pn.Row(
     pn.Column(
-        pn.Row(dashboard.param.version, dashboard.param.parameter),
+        pn.Row(
+            dashboard.param.version,
+            dashboard.param.parameter,
+            dashboard.param.plot_type,
+        ),
         dashboard.view,
         dashboard.hist,
     ),
