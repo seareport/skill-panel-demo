@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "skill-panel"
+version = "0.1.0"
+description = ""
+authors = ["tomsail <saillour.thomas@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+panel = "*"
+hvplot = "*"
+xarray = "*"
+holoviews = "*"
+shapely = "*"
+geopandas = "*"
+pandas = "*"
+numpy = "*"
+scikit-learn = "*"
+nbconvert = "*"
+geoviews = "*"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
