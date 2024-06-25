@@ -28,9 +28,11 @@ VERSIONS = {
     "Global 20km": "v0.2",
     # Add other versions here
 }
+
 PLOT_OPTS = {
-    "ts_view": dict(width=1200, height=800),
-    "scatter_view": dict(width=800, height=800),
+    "ts_view": dict(width=1000, height=600),
+    "taylor_view": dict(width=800, height=800),
+    "hist_view": dict(width=1000, height=400),
     "mod_opts_raster": dict(cmap=["blue"]),
     "mod_opts": dict(color="blue"),
     "obs_opts_raster": dict(cmap=["red"]),
@@ -127,6 +129,8 @@ class Dashboard(param.Parameterized):
             **PLOT_OPTS["ts_view"],
             cmap=self.ocean_mapping,  # Use the color mapping dictionary
             tools=[],
+            xlim=(-180, 180),
+            ylim=(-90, 90),
             legend=False
         ) * self.countries.hvplot().opts(color="grey", line_alpha=0.9, tools=[])
 
@@ -154,7 +158,7 @@ class Dashboard(param.Parameterized):
             diagram *= taylor_diagram(
                 df, norm=True, color=self.ocean_mapping[ocean], label=ocean
             )
-        return diagram.opts(**PLOT_OPTS["scatter_view"], shared_axes=False)
+        return diagram.opts(**PLOT_OPTS["taylor_view"], shared_axes=False)
 
     @param.depends("version", "parameter")
     def hist(self):
@@ -163,7 +167,7 @@ class Dashboard(param.Parameterized):
         hist = hist_(self.df, self.parameter, g="ocean", map=self.ocean_mapping)
         return hist.opts(
             shared_axes=False,
-            **PLOT_OPTS["scatter_view"],
+            **PLOT_OPTS["hist_view"],
             xlabel=self.parameter,
             ylabel="Count"
         )
@@ -173,9 +177,11 @@ class Dashboard(param.Parameterized):
 dashboard = Dashboard()
 layout = pn.Row(
     pn.Column(
-        pn.Row(dashboard.param.version, dashboard.param.parameter), dashboard.view
+        pn.Row(dashboard.param.version, dashboard.param.parameter),
+        dashboard.view,
+        dashboard.hist,
     ),
-    pn.Column(dashboard.taylor, dashboard.hist),
+    dashboard.taylor,
 )
 # Serve the Panel app
 layout.servable()

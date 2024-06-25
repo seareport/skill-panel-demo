@@ -5,25 +5,21 @@ from holoviews import opts
 
 
 def scatter_hist(src, x, y, z):
-    p = (
-        hv.Points(src, kdims=[x, y])
-        .hist(num_bins=90, dimension=[x, y])
-        .opts(
-            opts.Points(
-                show_title=False,
-                tools=["hover", "box_select", "tap"],
-                size=10,
-                color=z,
-                cmap="rainbow4",
-                line_color="k",
-                # line_='Category20',
-                # line_width=2,
-                # show_legend = False,
-                colorbar=True,
-            ),
-            opts.Histogram(tools=["hover", "box_select"]),
-            # opts.Layout(shared_axes=True, shared_datasource=True, merge_tools=True,),
-        )
+    p = hv.Points(src, kdims=[x, y]).opts(
+        opts.Points(
+            show_title=False,
+            tools=["hover", "box_select", "tap"],
+            size=10,
+            color=z,
+            cmap="rainbow4",
+            line_color="k",
+            # line_='Category20',
+            # line_width=2,
+            # show_legend = False,
+            colorbar=True,
+        ),
+        opts.Histogram(tools=["hover", "box_select"]),
+        # opts.Layout(shared_axes=True, shared_datasource=True, merge_tools=True,),
     )
     return p
 
@@ -71,7 +67,7 @@ def hist_(src, z, g="ocean", map=None):
         }
     colors = [map[ocean] for ocean in unique_oceans]
     return one_hot_df.hvplot.hist(
-        bins=20,
+        bins=25,
         bin_range=range_,
         # cmap = ocean_mapping,
         color=colors,

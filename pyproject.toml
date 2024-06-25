@@ -18,6 +18,7 @@ numpy = "*"
 scikit-learn = "*"
 nbconvert = "*"
 geoviews = "*"
+bokeh = "*"
 
 
 [build-system]
