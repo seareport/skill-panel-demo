@@ -112,7 +112,11 @@ def hist_(src, z, z_name, g="ocean", map=None, type="violin"):
 
 
 def radar_plot(
-    src: pd.DataFrame, params_dict: dict, g: str = "ocean", color_map: dict = None
+    src: pd.DataFrame,
+    params_dict: dict,
+    oceans_list: list[str],
+    g: str = "ocean",
+    color_map: dict = None,
 ) -> hv.Overlay:
     """
     Create a radar plot for different oceans and global ocean from a source DataFrame.
@@ -182,8 +186,9 @@ def radar_plot(
         return ticks, labels, markers
 
     # Create DataFrame to hold scores for each ocean and global ocean
-    oceans = src[g].unique()
-    df_res = pd.concat([get_score(src, ocean) for ocean in oceans] + [get_score(src)])
+    df_res = pd.concat(
+        [get_score(src, ocean) for ocean in oceans_list] + [get_score(src)]
+    )
 
     patches = hv.Overlay(
         [
@@ -219,4 +224,4 @@ def radar_plot(
         title=f"Score: {score_total:.3f}", show_legend=True, xaxis=None, yaxis=None
     )
 
-    return radar_plot
+    return radar_plot.redim(x={"range": (-1.2, 1.2)}, y={"range": (-1.2, 1.2)})

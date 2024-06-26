@@ -36,7 +36,7 @@ VERSIONS = {
 PLOT_OPTS = {
     "ts_view": dict(width=1000, height=600),
     "taylor_view": dict(width=700, height=700),
-    "radar_view": dict(width=700, height=700),
+    "radar_view": dict(width=500, height=500),
     "hist_view": dict(width=1000, height=400),
     "mod_opts_raster": dict(cmap=["blue"]),
     "mod_opts": dict(color="blue"),
@@ -79,6 +79,21 @@ PARAMS_SPIDER = {
     "Error on peaks >95th percentile [m]": "error95m",
     "Error on peaks >99th percentile [m]": "error99m",
 }
+
+OCEANS_SPIDER = [
+    "North Pacific Ocean",
+    "South Pacific Ocean",
+    "North Atlantic Ocean US",
+    "English Channel",
+    "North Sea",
+    "Bay of Biscay",
+    "Mediterranean Sea",
+    "South Atlantic Ocean",
+    "INDIAN OCEAN",
+    "Sea of Japan",
+    "Yellow Sea",
+    "North Atlantic Ocean EU",
+]
 
 PLOT_TYPE = {
     "Box Plot": "box",
@@ -200,7 +215,11 @@ class Dashboard(param.Parameterized):
     def radar(self):
         self.update_data()
         return radar_plot(
-            self.df, PARAMS_SPIDER, g="ocean", color_map=self.ocean_mapping
+            self.df,
+            PARAMS_SPIDER,
+            OCEANS_SPIDER,
+            g="ocean",
+            color_map=self.ocean_mapping,
         ).opts(
             **PLOT_OPTS["radar_view"],
             shared_axes=False,
