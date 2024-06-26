@@ -4,8 +4,8 @@ import pandas as pd
 from holoviews import opts
 
 
-def scatter_hist(src, x, y, z):
-    p = hv.Points(src, kdims=[x, y]).opts(
+def scatter_hist(src, x, y, z, id="ioc_code"):
+    p = hv.Points(src[[x, y, z, id]], kdims=[x, y]).opts(
         opts.Points(
             show_title=False,
             tools=["hover", "box_select", "tap"],
@@ -40,8 +40,8 @@ def stacked_hist(plot, element):
     plot.handles["plot"].y_range.reset_end = max(offset) * 1.1
 
 
-def hist_(src, z, g="ocean", map=None, type="violin"):
-    if z in ["rmse", "rms", "mad", "madp"]:
+def hist_(src, z, z_name, g="ocean", map=None, type="violin"):
+    if z in ["rmse", "rms", "rms_95", "mad", "madp"]:
         range_ = (0, 0.5)
     elif z in ["bias"]:
         range_ = (-0.2, 0.2)
@@ -79,7 +79,8 @@ def hist_(src, z, g="ocean", map=None, type="violin"):
             cmap=map,
             invert_axes=True,
             ylim=range_,
-            title=f"{z} mean: {mean:.2f}",
+            title=f"{z_name}, mean value: {mean:.2f}",
+            ylabel=z_name,
         )
     elif type == "box":
         return hv.BoxWhisker(
@@ -92,7 +93,8 @@ def hist_(src, z, g="ocean", map=None, type="violin"):
             invert_axes=True,
             outlier_radius=0.001,
             ylim=range_,
-            title=f"{z} mean: {mean:.2f}",
+            title=f"{z_name}, mean value: {mean:.2f}",
+            ylabel=z_name,
         )
     else:
         one_hot_df = pd.DataFrame(rows, columns=unique_oceans)
@@ -102,4 +104,8 @@ def hist_(src, z, g="ocean", map=None, type="violin"):
             bin_range=range_,
             # cmap = ocean_mapping,
             color=colors,
-        ).opts(hooks=[stacked_hist], title=f"{z} mean: {mean:.2f}")
+        ).opts(
+            hooks=[stacked_hist],
+            title=f"{z_name}, mean value: {mean:.2f}",
+            ylabel=z_name,
+        )

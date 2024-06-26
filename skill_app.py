@@ -44,29 +44,29 @@ PLOT_OPTS = {
 
 PARAMS = {
     "Root Mean Square Error": "rmse",
-    "Root Mean Square": "rms",
-    "Root Mean Square, 95th percentile": "rms_95",
-    "Bias": "bias",
+    "Root Mean Square [m]": "rms",
+    "Root Mean Square >95th percentile": "rms_95",
+    "Bias [m]": "bias",
     "Kling-Guplta efficiency": "kge",
     "Nash-Sutcliffe model efficiency": "nse2",
     "Lamba index": "lamba",
     "Correation Coefficient": "cr",
-    "Correlation Coefficient, 95th percentile": "cr_95",
+    "Correlation Coefficient >95th percentile": "cr_95",
     "Mean Absolute deviation": "mad",
     "Mean Absolute deviation of percentiles": "madp",
     "Normalized error on highest peak": "R1_norm",
     "Normalized error on 3 highest peaks": "R3_norm",
     "Normalized error on peaks >95th percentile": "error99",
     "Normalized error on peaks >99th percentile": "error95",
-    "Error on highest peak": "R1",
-    "Error on 3 highest peaks": "R3",
-    "Error on peaks >95th percentile": "error95m",
-    "Error on peaks >99th percentile": "error99m",
+    "Error on highest peak [m]": "R1",
+    "Error on 3 highest peaks [m]": "R3",
+    "Error on peaks >95th percentile [m]": "error95m",
+    "Error on peaks >99th percentile [m]": "error99m",
 }
 
 PLOT_TYPE = {
-    "Violin Plot": "violin",
     "Box Plot": "box",
+    "Violin Plot": "violin",
     "Histogram": "hist",
 }
 
@@ -141,13 +141,19 @@ class Dashboard(param.Parameterized):
             tools=[],
             xlim=(-180, 180),
             ylim=(-90, 90),
-            legend=False
+            legend=False,
         ) * self.countries.hvplot().opts(color="grey", line_alpha=0.9, tools=[])
 
         self.df = self.df.dropna()
         self.df["ioc_code"] = self.df.index
         self.df.loc[self.df["nse"] > 0, "nse2"] = self.df["nse"]
         self.df.loc[self.df["nse"] < 0, "nse2"] = 0
+
+    def get_parameter_name(self, dict_):
+        key_list = list(dict_.keys())
+        val_list = list(dict_.values())
+        param_name = key_list[val_list.index(self.parameter)]
+        return param_name
 
     @param.depends("version", "parameter")
     def view(self):
@@ -177,6 +183,7 @@ class Dashboard(param.Parameterized):
         hist = hist_(
             self.df,
             self.parameter,
+            self.get_parameter_name(PARAMS),
             g="ocean",
             map=self.ocean_mapping,
             type=self.plot_type,
@@ -184,8 +191,6 @@ class Dashboard(param.Parameterized):
         return hist.opts(
             shared_axes=False,
             **PLOT_OPTS["hist_view"],
-            xlabel=self.parameter,
-            ylabel="Count"
         )
 
 
