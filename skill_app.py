@@ -13,6 +13,7 @@ import param
 import shapely
 
 from utils.hists import hist_
+from utils.hists import radar_plot
 from utils.hists import scatter_hist
 from utils.taylor import taylor_diagram
 
@@ -34,7 +35,8 @@ VERSIONS = {
 
 PLOT_OPTS = {
     "ts_view": dict(width=1000, height=600),
-    "taylor_view": dict(width=800, height=800),
+    "taylor_view": dict(width=700, height=700),
+    "radar_view": dict(width=700, height=700),
     "hist_view": dict(width=1000, height=400),
     "mod_opts_raster": dict(cmap=["blue"]),
     "mod_opts": dict(color="blue"),
@@ -50,6 +52,8 @@ PARAMS = {
     "Kling-Guplta efficiency": "kge",
     "Nash-Sutcliffe model efficiency": "nse2",
     "Lamba index": "lamba",
+    "Slope": "slope",
+    "Slope of percentiles": "slopepp",
     "Correation Coefficient": "cr",
     "Correlation Coefficient >95th percentile": "cr_95",
     "Mean Absolute deviation": "mad",
@@ -58,6 +62,18 @@ PARAMS = {
     "Normalized error on 3 highest peaks": "R3_norm",
     "Normalized error on peaks >95th percentile": "error99",
     "Normalized error on peaks >99th percentile": "error95",
+    "Error on highest peak [m]": "R1",
+    "Error on 3 highest peaks [m]": "R3",
+    "Error on peaks >95th percentile [m]": "error95m",
+    "Error on peaks >99th percentile [m]": "error99m",
+}
+
+PARAMS_SPIDER = {
+    "Slope": "slope",
+    "Root Mean Square [m]": "rms",
+    "Correlation Coefficient": "cr",
+    "Root Mean Square >95th percentile": "rms_95",
+    "Correlation Coefficient >95th percentile": "cr_95",
     "Error on highest peak [m]": "R1",
     "Error on 3 highest peaks [m]": "R3",
     "Error on peaks >95th percentile [m]": "error95m",
@@ -174,7 +190,22 @@ class Dashboard(param.Parameterized):
             diagram *= taylor_diagram(
                 df, norm=True, color=self.ocean_mapping[ocean], label=ocean
             )
-        return diagram.opts(**PLOT_OPTS["taylor_view"], shared_axes=False)
+        return diagram.opts(
+            **PLOT_OPTS["taylor_view"],
+            shared_axes=False,
+            legend_opts={"background_fill_alpha": 0.6},
+        )
+
+    @param.depends("version")
+    def radar(self):
+        self.update_data()
+        return radar_plot(
+            self.df, PARAMS_SPIDER, g="ocean", color_map=self.ocean_mapping
+        ).opts(
+            **PLOT_OPTS["radar_view"],
+            shared_axes=False,
+            legend_opts={"background_fill_alpha": 0.5},
+        )
 
     @param.depends("version", "parameter", "plot_type")
     def hist(self):
@@ -206,7 +237,7 @@ layout = pn.Row(
         dashboard.view,
         dashboard.hist,
     ),
-    dashboard.taylor,
+    pn.Column(dashboard.taylor, dashboard.radar),
 )
 # Serve the Panel app
 layout.servable()

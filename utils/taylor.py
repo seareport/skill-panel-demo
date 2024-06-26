@@ -160,7 +160,7 @@ def taylor_diagram(
         hover_fill_color="firebrick",
         xlim=(0, std_range.max() * 1.05),
         ylim=(0, std_range.max() * 1.05),
-        # clabel = 'ocean'
+        fontscale=0.9,
     )
     # Combine all the elements
     taylor_diagram = scatter_plot
