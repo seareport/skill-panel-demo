@@ -20,6 +20,7 @@ shapely = "*"
 thalassa = "*"
 watchfiles = "*"
 ipykernel = "*"
+geodatasets = "*"
 
 
 [build-system]
