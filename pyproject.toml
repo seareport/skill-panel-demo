@@ -4,21 +4,22 @@ version = "0.1.0"
 description = ""
 authors = ["tomsail <saillour.thomas@gmail.com>"]
 readme = "README.md"
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.10"
-panel = "*"
-hvplot = "*"
-xarray = "*"
-holoviews = "*"
-shapely = "*"
-geopandas = "*"
-pandas = "*"
-numpy = "*"
-scikit-learn = "*"
-nbconvert = "*"
-geoviews = "*"
 bokeh = "*"
+geopandas = "*"
+geoviews = "*"
+holoviews = "*"
+hvplot = "*"
+numpy = "*"
+pandas = "*"
+panel = "*"
+shapely = "*"
+thalassa = "*"
+watchfiles = "*"
+ipykernel = "*"
 
 
 [build-system]

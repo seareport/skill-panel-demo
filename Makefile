@@ -17,3 +17,6 @@ mypy:
 deps:
 	pre-commit run poetry-lock -a
 	pre-commit run poetry-export -a
+
+serve:
+	python -mpanel serve *app.py --autoreload --allow-websocket-origin=127.0.0.1:5006
