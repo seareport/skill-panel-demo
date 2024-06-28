@@ -40,13 +40,15 @@ def stacked_hist(plot, element):
     plot.handles["plot"].y_range.reset_end = max(offset) * 1.1
 
 
-def hist_(src, z, z_name, g="ocean", map=None, type="violin"):
+def hist_(src, z, z_name, g="ocean", map=None, type="box"):
     if z in ["rmse", "rms", "rms_95", "mad", "madp"]:
         range_ = (0, 0.5)
     elif z in ["bias"]:
         range_ = (-0.2, 0.2)
     elif z in ["R1", "R3"]:
         range_ = (-1, 1)
+    elif z in ["slope"]:
+        range_ = (0, 2)
     else:
         range_ = (0, 1)
 
@@ -91,7 +93,7 @@ def hist_(src, z, z_name, g="ocean", map=None, type="violin"):
             box_color=g,
             cmap=map,
             invert_axes=True,
-            outlier_radius=0.001,
+            outlier_radius=0.0005,
             ylim=range_,
             title=f"{z_name}, mean value: {mean:.2f}",
             ylabel=z_name,
