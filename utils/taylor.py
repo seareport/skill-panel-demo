@@ -122,9 +122,7 @@ def taylor_diagram(
 
     x = std_mod * np.cos(theta)
     y = std_mod * np.sin(theta)
-    df["x"] = x
-    df["y"] = y
-    df["rms_perc"] = df["rms"] / df["std_df2"]
+    df = df.assign(x=x, y=y, rms_perc=df["rms"] / df["std_df2"])
     # hover parameters
     tooltips = [
         ("Bias", "@bias"),
