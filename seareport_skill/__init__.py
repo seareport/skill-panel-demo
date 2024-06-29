@@ -6,7 +6,7 @@ import pandas as pd
 import shapely
 
 __all__: list[str] = [
-    "load_stats",
+    "load_model_stats",
 ]
 
 
@@ -16,7 +16,7 @@ def load_countries() -> gp.GeoDataFrame:
     return countries
 
 
-def load_stats(model_version) -> pd.DataFrame:
+def load_model_stats(model_version) -> pd.DataFrame:
     df = pd.read_parquet(f"assets/{model_version}.parquet").astype(float).sort_index()
     return df
 

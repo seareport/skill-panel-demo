@@ -4,7 +4,7 @@ import logging
 
 import panel as pn
 
-from seareport_skill import load_stats
+from seareport_skill import load_model_stats
 from seareport_skill import settings
 
 logging.basicConfig(level=10)
@@ -19,7 +19,8 @@ metrics = pn.widgets.MultiSelect(
     name="Metrics", options=settings.METRICS, size=8, sizing_mode="stretch_width"
 )
 stations = pn.widgets.CrossSelector(
-    name="Stations", options=load_stats("v0.0").index.tolist(), width=400
+    name="Stations",
+    options=load_model_stats("v0.0").index.tolist(),
 )
 
 if pn.state.location:
@@ -30,7 +31,7 @@ if pn.state.location:
 
 @pn.depends(version, metrics, stations)
 def update_dataframe(version_val, metrics_val, stations_val) -> pn.pane.DataFrame:
-    stats = load_stats(version_val)
+    stats = load_model_stats(version_val)
     if metrics_val:
         stats = stats[metrics_val]
     else:

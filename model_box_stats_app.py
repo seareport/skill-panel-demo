@@ -10,7 +10,7 @@ import panel as pn
 
 from seareport_skill import assign_oceans
 from seareport_skill import load_countries
-from seareport_skill import load_stats
+from seareport_skill import load_model_stats
 from seareport_skill import settings
 from utils.hists import hist_
 
@@ -62,7 +62,7 @@ def update_color_map(df, filter_var):
 def update_dataframe(
     version_val, metrics_val, type_select_val, oceans_val, sector_val
 ) -> pn.pane.DataFrame:
-    stats = load_stats(version_val)
+    stats = load_model_stats(version_val)
     stats = assign_oceans(stats)
     cmap = update_color_map(GDF, type_select_val)
     if type_select_val == "ocean":
