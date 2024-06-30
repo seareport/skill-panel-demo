@@ -4,22 +4,34 @@ import pandas as pd
 from holoviews import opts
 
 
-def scatter_hist(src, x, y, z, id="ioc_code"):
-    p = hv.Points(src[[x, y, z, id]], kdims=[x, y]).opts(
+def scatter_plot(
+    df,
+    x,
+    y,
+    z=None,
+    color="r",
+    line_coror="k",
+    line_width=2,
+    cmap=None,
+    show_legend=False,
+    colorbar=False,
+) -> hv.Points:
+    if z is None:
+        color = color
+    else:
+        color = z
+    p = hv.Points(df[[x, y]], kdims=[x, y]).opts(
         opts.Points(
             show_title=False,
             tools=["hover", "box_select", "tap"],
-            size=10,
-            color=z,
-            cmap="rainbow4",
-            line_color="k",
-            # line_='Category20',
-            # line_width=2,
-            # show_legend = False,
-            colorbar=True,
+            size=7,
+            color=color,
+            line_color=line_coror,
+            line_width=line_width,
+            cmap=cmap,
+            show_legend=show_legend,
+            colorbar=colorbar,
         ),
-        opts.Histogram(tools=["hover", "box_select"]),
-        # opts.Layout(shared_axes=True, shared_datasource=True, merge_tools=True,),
     )
     return p
 

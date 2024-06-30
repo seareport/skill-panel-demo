@@ -86,6 +86,7 @@ def taylor_diagram(
     norm: bool = True,
     marker: str = "circle",
     color: str = "black",
+    cmap=None,
     label: str = "Taylor Diagram",
 ) -> hv.Overlay:
     if df.empty:
@@ -101,14 +102,14 @@ def taylor_diagram(
     theta = np.arccos(df["cr"])  # Convert Cr to radians for polar plot
     if norm:
         std_ref = 1
-        std_mod = df["std_df1"] / df["std_df2"]
+        std_mod = df["sim_std"] / df["obs_std"]
     else:
         if len(df) > 1:
             raise ValueError(
                 "for not normalised Taylor diagrams, you need only 1 data point"
             )
-        std_ref = df["std_df1"].mean()
-        std_mod = df["std_df2"].mean()
+        std_ref = df["sim_std"].mean()
+        std_mod = df["obs_std"].mean()
     #
     std_range = np.arange(0, 1.5 * std_ref, np.round(std_ref / 5, 2))
     corr_range = np.arange(0, 1, 0.1)
@@ -122,7 +123,7 @@ def taylor_diagram(
 
     x = std_mod * np.cos(theta)
     y = std_mod * np.sin(theta)
-    df = df.assign(x=x, y=y, rms_perc=df["rms"] / df["std_df2"])
+    df = df.assign(x=x, y=y, rms_perc=df["rms"] / df["obs_std"])
     # hover parameters
     tooltips = [
         ("Bias", "@bias"),
@@ -132,7 +133,7 @@ def taylor_diagram(
         ("KGE", "@kge"),
         ("Std Dev Model (m)", "@std_df1"),
         ("Std Dev Measure (m)", "@std_df2"),
-        ("Station (m)", "@ioc_code"),
+        # ("Station (m)", "@ioc_code"),
         ("Ocean", "@ocean"),
     ]
     if norm:
@@ -143,11 +144,11 @@ def taylor_diagram(
     scatter_plot = hv.Points(
         df,
         ["x", "y"],
-        ["cr", "std_df1", "std_df2", "rms", "rmse", "rms_perc", "ioc_code", "ocean"],
+        ["cr", "sim_std", "obs_std", "rms", "rmse", "rms_perc", "name", "ocean"],
         label=label,
     ).opts(
         color=color,
-        # cmap='Category20',
+        cmap=cmap,
         # line_color='k',
         line_width=1,
         marker=marker,
