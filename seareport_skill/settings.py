@@ -176,7 +176,7 @@ with :
 $$\lambda = 1 - \frac{\sum{(x_c - x_m)^2}}{\sum{(x_m - \overline{x}_m)^2} + \sum{(x_c - \overline{x}_c)^2} + n(\overline{x}_m - \overline{x}_c)^2 + \kappa}$$
  * with `kappa` $$2 \cdot \left| \sum{((x_m - \overline{x}_m) \cdot (x_c - \overline{x}_c))} \right|$$
 
-### ADD STROM SELECTION PROCESS
+### ADD STORM SELECTION PROCESS
 from methodology explained in this [notebook](https://tomsail.github.io/static/Model_metrics.html)
 ### ADD "Slope" parameters
 more info can be found [in this preprint](https://doi.org/10.5194/egusphere-2024-1415) from Campos-Caba et. al.
