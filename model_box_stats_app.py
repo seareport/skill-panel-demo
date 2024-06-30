@@ -122,7 +122,7 @@ def update_plots(
 @pn.depends(type_select, version, oceans, sector)
 def map_plot(type_select_val, version_val, oceans_val, sector_val) -> pn.pane.HoloViews:
     countries = load_countries()
-    stats = load_stats(version_val)
+    stats = load_model_stats(version_val)
     stats = assign_oceans(stats)
     if type_select_val == "ocean":
         if oceans_val:

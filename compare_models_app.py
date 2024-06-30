@@ -4,6 +4,7 @@ import logging
 import typing as T
 
 import holoviews as hv
+import hvplot.pandas  # noqa: F401
 import pandas as pd
 import panel as pn
 
