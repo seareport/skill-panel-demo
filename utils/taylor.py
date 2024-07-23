@@ -149,10 +149,10 @@ def taylor_diagram(
     ).opts(
         color=color,
         cmap=cmap,
-        # line_color='k',
-        line_width=1,
+        line_color="k",
+        line_width=0.7,
         marker=marker,
-        size=8,
+        size=10,
         tools=[hover],
         default_tools=[],
         show_legend=True,

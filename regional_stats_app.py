@@ -107,7 +107,7 @@ def update_plots(
         show_grid=True,
         show_legend=False,
         default_tools=["pan"],
-        tools=["box_zoom", "reset", "save"],
+        tools=["hover", "box_zoom", "reset", "save"],
     )
     taylor_ = (T_VOID * taylor).opts(
         width=600,
