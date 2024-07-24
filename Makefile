@@ -21,5 +21,5 @@ deps:
 serve:
 	python -mpanel serve *app.py --autoreload --allow-websocket-origin=127.0.0.1:5006
 
-serve heroku:
+heroku:
 	python -mpanel serve --address="0.0.0.0" *app.py --autoreload --allow-websocket-origin=skill-panel-3607dfd2cee1.herokuapp.com --use-xheaders
