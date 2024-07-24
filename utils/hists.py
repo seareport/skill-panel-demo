@@ -20,7 +20,7 @@ def scatter_plot(
         color = color
     else:
         color = z
-    p = hv.Points(df[[x, y]], kdims=[x, y]).opts(
+    p = hv.Points(df, kdims=[x, y]).opts(
         opts.Points(
             show_title=False,
             tools=["hover", "box_select", "tap"],

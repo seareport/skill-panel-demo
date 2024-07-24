@@ -130,7 +130,7 @@ def map_plot(type_select_val, version_val, oceans_val, sector_val) -> pn.pane.Ho
     else:
         if sector_val:
             stats = stats[stats.name.isin(sector_val)]
-    points = scatter_plot(stats, "obs_lon", "obs_lat")
+    points = scatter_plot(stats[["obs_lon", "obs_lat"]], "obs_lon", "obs_lat")
     cmap = update_color_map(GDF, type_select_val)
     map_ = countries.hvplot().opts(color="white", line_alpha=0.9)
     map_plot = (

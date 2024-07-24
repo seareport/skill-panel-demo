@@ -21,7 +21,8 @@ thalassa = "*"
 watchfiles = "*"
 ipykernel = "*"
 geodatasets = "*"
-
+pyextremes = "^2.3.2"
+seastats = {git = "https://github.com/seareport/seastats"}
 
 [build-system]
 requires = ["poetry-core"]
