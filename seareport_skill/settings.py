@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import colorcet as cc
 
 # Constants and configuration
 SURGE_FOLDER = "./obs/surge/"
@@ -193,3 +194,45 @@ this happens when the function `storms/match_extremes.py` couldn't finc concomit
 ## D. Slope parameters
 more info can be found [in this preprint](https://doi.org/10.5194/egusphere-2024-1415) from Campos-Caba et. al.
 """
+
+TABULATOR_CSS = """
+.tabulator-cell {
+    font-size: 10px;
+}
+.tabulator-col-title {
+    font-size: 11px;
+}
+.tabulator-row {
+  vertical-align: middle;
+  height: 6px;
+  margin: -5px;
+  padding: -5px;
+}
+
+"""
+
+TABULATOR_FORMATTER = {
+    "rmse": {"type": "progress", "min": 0, "max": 0.2, "color": cc.CET_R4},
+    "rms": {"type": "progress", "min": 0, "max": 0.2, "color": cc.CET_R4},
+    "rms_95": {"type": "progress", "min": 0, "max": 0.2, "color": cc.CET_R4},
+    "bias": {"type": "progress", "min": -0.2, "max": 0.2, "color": cc.coolwarm},
+    "kge": {"type": "progress", "min": 0, "max": 1, "color": cc.CET_R4[::-1]},
+    "nse": {"type": "progress", "min": 0, "max": 1, "color": cc.CET_R4[::-1]},
+    "lamba": {"type": "progress", "min": 0, "max": 1, "color": cc.CET_R4[::-1]},
+    "slope": {"type": "progress", "min": 0.5, "max": 1.5, "color": cc.coolwarm},
+    "slope_pp": {"type": "progress", "min": 0.5, "max": 1.5, "color": cc.coolwarm},
+    "cr": {"type": "progress", "min": 0, "max": 1, "color": cc.CET_R4[::-1]},
+    "cr_95": {"type": "progress", "min": 0, "max": 1, "color": cc.CET_R4[::-1]},
+    "mad": {"type": "progress", "min": 0, "max": 0.2, "color": cc.CET_R4},
+    "madp": {"type": "progress", "min": 0, "max": 0.1, "color": cc.CET_R4},
+    "R1_norm": {"type": "progress", "min": 0, "max": 1, "color": cc.CET_R4},
+    "R3_norm": {"type": "progress", "min": 0, "max": 1, "color": cc.CET_R4},
+    "error95": {"type": "progress", "min": 0, "max": 1, "color": cc.CET_R4},
+    "error99": {"type": "progress", "min": 0, "max": 1, "color": cc.CET_R4},
+    "R1": {"type": "progress", "min": 0, "max": 0.5, "color": cc.CET_R4},
+    "R3": {"type": "progress", "min": 0, "max": 0.5, "color": cc.CET_R4},
+    "error95m": {"type": "progress", "min": 0, "max": 0.5, "color": cc.CET_R4},
+    "error99m": {"type": "progress", "min": 0, "max": 0.5, "color": cc.CET_R4},
+}
+
+TABULATOR_CONFIG = {}

@@ -31,6 +31,7 @@ logging.basicConfig(level=10)
 logger = logging.getLogger()
 
 pn.extension("mathjax")
+pn.extension("tabulator")
 
 
 OBS_FOLDER = "./01_obs"
@@ -66,6 +67,10 @@ station = pn.widgets.AutocompleteInput(
     name="Station", options=list(statsv0.index), sizing_mode="stretch_width"
 )
 
+show_colors = pn.widgets.Checkbox(
+    name="Show metric colors in Table", value=False, sizing_mode="stretch_width"
+)
+
 map_view = {
     "width": 1300,
     "height": 500,
@@ -81,6 +86,7 @@ scatter_view = {
 
 if pn.state.location:
     pn.state.location.sync(version, {"value": version.name})
+    pn.state.location.sync(version_plot, {"value": version.name})
     pn.state.location.sync(metrics, {"value": metrics.name})
     pn.state.location.sync(station, {"value": station.name})
     pn.state.location.sync(quantile, {"value": quantile.name})
@@ -207,8 +213,8 @@ def map_plot(version_val, metrics_val) -> pn.pane.HoloViews:
     )
 
 
-@pn.depends(version_plot, station.param.value, quantile)
-def time_series_plots(version_plot_val, station_val, quantile_val):
+@pn.depends(version_plot, station.param.value, quantile, show_colors)
+def time_series_plots(version_plot_val, station_val, quantile_val, show_colors_val):
     if not station_val:
         emp_ = pd.DataFrame()
         empty_ts = plot_extreme_raster(emp_, 0).opts(**ts_view)
@@ -260,11 +266,26 @@ def time_series_plots(version_plot_val, station_val, quantile_val):
                 scat = temp
             else:
                 scat *= temp
+            # dataframe part
             stats = pd.DataFrame(get_stats(sim_, obs_), index=[model_])
             df_stats = pd.concat([df_stats, stats], axis=0)
 
         ts_pane = pn.pane.HoloViews(ts + scat, width_policy="max")
-        df_pane = pn.pane.DataFrame(df_stats, sizing_mode="stretch_width")
+        if show_colors_val:
+            df_pane = pn.widgets.Tabulator(
+                df_stats,
+                sizing_mode="stretch_width",
+                stylesheets=[settings.TABULATOR_CSS],
+                formatters=settings.TABULATOR_FORMATTER,
+                configuration=settings.TABULATOR_CONFIG,
+                layout="fit_data_table",
+            )
+        else:
+            df_pane = pn.widgets.Tabulator(
+                df_stats,
+                sizing_mode="stretch_width",
+                stylesheets=[settings.TABULATOR_CSS],
+            )
         return ts_pane, df_pane
 
 
@@ -275,7 +296,7 @@ time_series_column = pn.Column()
 # Define a function to update the contents of the Column based on time_series_plots
 def update_time_series_column(event=None):
     ts_pane, df_pane = time_series_plots(
-        version_plot.value, station.value, quantile.value
+        version_plot.value, station.value, quantile.value, show_colors.value
     )
     # Clear the existing contents and update with new panes
     time_series_column.clear()
@@ -288,6 +309,7 @@ update_time_series_column()
 version_plot.param.watch(update_time_series_column, "value")
 station.param.watch(update_time_series_column, "value")
 quantile.param.watch(update_time_series_column, "value")
+show_colors.param.watch(update_time_series_column, "value")
 
 template = pn.template.MaterialTemplate(
     title="Time Series Analysis",
@@ -297,6 +319,7 @@ template = pn.template.MaterialTemplate(
         metrics,
         station,
         quantile,
+        show_colors,
         pn.pane.Markdown(settings.METRICS_DOC),
     ],
     sidebar_width=430,
