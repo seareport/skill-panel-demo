@@ -35,7 +35,7 @@ METRICS = {
     "Lamba index": "lamba",
     "Slope": "slope",
     "Slope of percentiles": "slope_pp",
-    "Correation Coefficient": "cr",
+    "Correlation Coefficient": "cr",
     "Correlation Coefficient >95th percentile": "cr_95",
     "Mean Absolute deviation": "mad",
     "Mean Absolute deviation of percentiles": "madp",

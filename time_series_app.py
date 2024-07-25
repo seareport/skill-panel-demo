@@ -45,7 +45,7 @@ version = pn.widgets.Select(
 
 version_plot = pn.widgets.CheckBoxGroup(
     name="Models Versions for Time Series",
-    value=[MODELS[0]],
+    value=[],
     options=MODELS,
     sizing_mode="stretch_width",
 )
