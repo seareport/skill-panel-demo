@@ -35,6 +35,10 @@ pn.extension("mathjax")
 
 OBS_FOLDER = "./01_obs"
 MODELS = list(glob.glob(OBS_FOLDER + "/model/*"))
+if len(MODELS) > 0:
+    DEFAULT_VAL = MODELS[0]
+else:
+    DEFAULT_VAL = []
 CMAP_ = cc.colorwheel
 
 statsv0 = load_model_stats("v0.0")
@@ -45,7 +49,7 @@ version = pn.widgets.Select(
 
 version_plot = pn.widgets.CheckBoxGroup(
     name="Models Versions for Time Series",
-    value=[],
+    value=[DEFAULT_VAL],
     options=MODELS,
     sizing_mode="stretch_width",
 )
@@ -147,14 +151,14 @@ def scatter_plot_raster(
         sc_ = spread(rasterize(p)).opts(
             cmap=[color], cnorm="linear", alpha=0.9, **scatter_view
         )
-        slope, intercept = get_slope_intercept(ts1, ts2)
+        slope, intercept = get_slope_intercept(ts2, ts1)
     if extremes_match.empty:
         ext_ = hv.Points((0, 0))
     else:
         ext_ = hv.Points(
             (extremes_match["modeled"].values, extremes_match["observed"]), label=label
         ).opts(size=8, fill_color=color, line_color="k")
-    ax_plot = hv.Slope(1, 0).opts(color=color, show_grid=True)
+    ax_plot = hv.Slope(1, 0).opts(color="grey", show_grid=True)
 
     lr_plot = hv.Slope(
         slope, intercept, label=f"y = {slope:.2f}x + {intercept:.2f}"
@@ -162,7 +166,7 @@ def scatter_plot_raster(
     #
     if pp_plot:
         pc1, pc2 = get_percentiles(ts1, ts2, higher_tail=True)
-        ppp = hv.Scatter((pc1, pc2), ("modeled", "observed"), label="percentiles").opts(
+        ppp = hv.Scatter((pc1, pc2), label="percentiles").opts(
             fill_color="g", line_color="b", size=10
         )
         return ax_plot * lr_plot * sc_ * ext_ * ppp
