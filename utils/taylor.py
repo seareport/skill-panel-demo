@@ -65,12 +65,12 @@ def create_rms_contours(
             * hv.Text(
                 standard_ref + rms * np.cos(2 * np.pi / 3),
                 rms * np.sin(2 * np.pi / 3),
-                f"{rms:.2f}",
+                f"{rms*100:.0f}%",
                 halign="left",
                 valign="bottom",
             ).opts(text_font_size="10pt", text_color="green")
         )
-    label = "RMS %" if norm else "RMS"
+    label = "Centered RMS" if norm else "RMS"
     rms_label = hv.Text(
         standard_ref,
         rms_range[1] * np.sin(np.pi / 2),
@@ -133,7 +133,7 @@ def taylor_diagram(
         ("KGE", "@kge"),
         ("Std Dev Model (m)", "@std_df1"),
         ("Std Dev Measure (m)", "@std_df2"),
-        # ("Station (m)", "@ioc_code"),
+        ("Station (m)", "@id"),
         ("Ocean", "@ocean"),
     ]
     if norm:
@@ -144,7 +144,7 @@ def taylor_diagram(
     scatter_plot = hv.Points(
         df,
         ["x", "y"],
-        ["cr", "sim_std", "obs_std", "rms", "rmse", "rms_perc", "name", "ocean"],
+        ["cr", "sim_std", "obs_std", "rms", "rmse", "rms_perc", "name", "ocean", "id"],
         label=label,
     ).opts(
         color=color,

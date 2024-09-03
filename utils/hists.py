@@ -57,8 +57,6 @@ def hist_(src, z, z_name, g="ocean", map=None, type="box"):
         range_ = (0, 0.5)
     elif z in ["bias"]:
         range_ = (-0.2, 0.2)
-    elif z in ["R1", "R3"]:
-        range_ = (-1, 1)
     elif z in ["slope"]:
         range_ = (0, 2)
     else:

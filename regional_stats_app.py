@@ -33,9 +33,11 @@ type_select = pn.widgets.Select(
     options=settings.TYPE_SELECT,
     sizing_mode="stretch_width",
 )
-oceans = pn.widgets.CrossSelector(name="Oceans", options=settings.OCEANS, width=400)
+oceans = pn.widgets.CrossSelector(
+    name="Oceans", options=sorted(settings.OCEANS), width=400
+)
 sector = pn.widgets.CrossSelector(
-    name="Maritime Sectors", options=settings.SECTORS, width=400, height=720
+    name="Maritime Sectors", options=sorted(settings.SECTORS), width=400, height=720
 )
 
 if pn.state.location:
@@ -98,6 +100,7 @@ def update_plots(
         tools=["box_zoom", "reset", "save"],
     )
 
+    stats["id"] = stats.index
     taylor = taylor_diagram(
         stats,
         norm=True,
@@ -130,7 +133,8 @@ def map_plot(type_select_val, version_val, oceans_val, sector_val) -> pn.pane.Ho
     else:
         if sector_val:
             stats = stats[stats.name.isin(sector_val)]
-    points = scatter_plot(stats[["obs_lon", "obs_lat"]], "obs_lon", "obs_lat")
+    stats["id"] = stats.index
+    points = scatter_plot(stats[["obs_lon", "obs_lat", "id"]], "obs_lon", "obs_lat")
     cmap = update_color_map(GDF, type_select_val)
     map_ = countries.hvplot().opts(color="white", line_alpha=0.9)
     map_plot = (

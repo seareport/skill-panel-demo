@@ -1,1 +1,1 @@
-web: python -mpanel serve --address="0.0.0.0" --port=$PORT *app.py --autoreload --allow-websocket-origin=skill-panel-3607dfd2cee1.herokuapp.com --use-xheaders
+web: python -mpanel serve --address="0.0.0.0" --port=$PORT compare_models_app.py model_table_app.py regional_stats_app.py --autoreload --allow-websocket-origin=skill-panel-3607dfd2cee1.herokuapp.com --use-xheaders
