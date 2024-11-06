@@ -5,7 +5,6 @@ import panel as pn
 
 # Constants and configuration
 SURGE_FOLDER = "./obs/surge/"
-STATS_JSON = "assets/stats_all.json"
 TMIN = "2023-01-01"
 TMAX = "2023-12-31"
 VERSIONS = {
