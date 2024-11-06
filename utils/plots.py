@@ -1,7 +1,13 @@
+import geoviews as gv
 import holoviews as hv
 import numpy as np
 import pandas as pd
 from holoviews import opts
+from holoviews.operation.datashader import rasterize
+from holoviews.operation.datashader import spread
+from seastats.stats import get_percentiles
+from seastats.stats import get_slope_intercept
+from seastats.storms import match_extremes
 
 
 def scatter_plot(
@@ -15,24 +21,40 @@ def scatter_plot(
     cmap=None,
     show_legend=False,
     colorbar=False,
+    geo=False,
 ) -> hv.Points:
     if z is None:
         color = color
     else:
         color = z
-    p = hv.Points(df, kdims=[x, y]).opts(
-        opts.Points(
-            show_title=False,
-            tools=["hover", "box_select", "tap"],
-            size=7,
-            color=color,
-            line_color=line_coror,
-            line_width=line_width,
-            cmap=cmap,
-            show_legend=show_legend,
-            colorbar=colorbar,
-        ),
-    )
+    if geo:
+        p = gv.Points(df, kdims=[x, y]).opts(
+            opts.Points(
+                show_title=False,
+                tools=["hover", "box_select", "tap"],
+                size=7,
+                color=color,
+                line_color=line_coror,
+                line_width=line_width,
+                cmap=cmap,
+                show_legend=show_legend,
+                colorbar=colorbar,
+            ),
+        )
+    else:
+        p = hv.Points(df, kdims=[x, y]).opts(
+            opts.Points(
+                show_title=False,
+                tools=["hover", "box_select", "tap"],
+                size=7,
+                color=color,
+                line_color=line_coror,
+                line_width=line_width,
+                cmap=cmap,
+                show_legend=show_legend,
+                colorbar=colorbar,
+            ),
+        )
     return p
 
 
@@ -237,3 +259,72 @@ def radar_plot(
     )
 
     return radar_plot.redim(x={"range": (-1.2, 1.2)}, y={"range": (-1.2, 1.2)})
+
+
+def plot_extreme_raster(
+    ts: pd.Series, ext: pd.DataFrame, color="black", label="", **kwargs
+):
+    """
+    this function might induce overhead if the time series is too long
+    """
+    if ts.empty:
+        ts_ = rasterize(hv.Curve(([0, 0], [1, 0]), label=label), line_width=0.5).opts(
+            cmap=[color], show_grid=True, alpha=0.7, **kwargs
+        )
+    else:
+        ts_ = rasterize(hv.Curve(ts, label=label), line_width=0.5).opts(
+            cmap=[color], show_grid=True, alpha=0.7, **kwargs
+        )
+    if ext.empty:
+        sc_ = hv.Scatter((0, 0), label=label).opts(
+            opts.Scatter(line_color="black", line_alpha=0.3, fill_color=color, size=8)
+        )
+    else:
+        sc_ = hv.Scatter(ext, label=label).opts(
+            opts.Scatter(line_color="black", line_alpha=0.3, fill_color=color, size=8)
+        )
+    return ts_ * sc_
+
+
+def scatter_plot_raster(
+    ts1: pd.Series,
+    ts2: pd.Series,
+    quantile: float,
+    cluster_duration: int = 72,
+    pp_plot: bool = True,
+    color: str = "black",
+    label: str = "",
+    kdims: list[str] = ["observed", "model"],
+    **kwargs,
+):
+    if ts1.empty or ts2.empty:
+        sc_ = spread(rasterize(hv.Points((0, 0))))
+        extremes_match = pd.DataFrame()
+        slope, intercept = (0, 0)
+    else:
+        extremes_match = match_extremes(ts2, ts1, quantile, cluster_duration)
+        p = hv.Points((ts1.values, ts2.values))
+        sc_ = spread(rasterize(p)).opts(
+            cmap=[color], cnorm="linear", alpha=0.8, **kwargs
+        )
+        slope, intercept = get_slope_intercept(ts2, ts1)
+    if extremes_match.empty:
+        ext_ = hv.Points((0, 0))
+    else:
+        ext_ = hv.Points(extremes_match, kdims=kdims, label=f"extremes {label}").opts(
+            size=8, fill_color=color, line_color="k", legend_position="bottom_right"
+        )
+    ax_plot = hv.Slope(1, 0).opts(color="grey", show_grid=True)
+
+    lr_plot = hv.Slope(
+        slope, intercept, label=f"y = {slope:.2f}x + {intercept:.2f}"
+    ).opts(color=color, line_dash="dashed")
+    #
+    if pp_plot and not ts1.empty:
+        pc1, pc2 = get_percentiles(ts1, ts2, higher_tail=True)
+        ppp = hv.Scatter((pc1, pc2), label=f"perc. {label}").opts(
+            fill_color=color, line_color="k", line_width=3, size=7
+        )
+        return ext_ * sc_ * ppp * ax_plot * lr_plot
+    else:
+        return ext_ * sc_ * ax_plot * lr_plot

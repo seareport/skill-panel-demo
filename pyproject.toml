@@ -17,12 +17,14 @@ numpy = "*"
 pandas = "*"
 panel = "*"
 shapely = "*"
-thalassa = "*"
+thalassa = {git = "https://github.com/tomsail/Thalassa.git", rev = "no_transform"}
 watchfiles = "*"
 ipykernel = "*"
 geodatasets = "*"
 pyextremes = "^2.3.2"
 seastats = {git = "https://github.com/seareport/seastats"}
+xarray-selafin = "^0.1.8"
+seareport-data = "^0.1.0"
 
 [build-system]
 requires = ["poetry-core"]

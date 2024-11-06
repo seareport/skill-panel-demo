@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import glob
 import logging
 import typing as T
 
@@ -10,15 +11,21 @@ import panel as pn
 
 from seareport_skill import load_stats
 from seareport_skill import settings
+from utils.tools import folders_to_models
+from utils.tools import get_metric_range
 
 logging.basicConfig(level=10)
 logger = logging.getLogger()
 
 pn.extension()
 
+OBS_FOLDER = "./01_obs"
+folders = sorted(list(glob.glob(OBS_FOLDER + "/model/*")))
+MODELS = folders_to_models(folders)
+
 versions = pn.widgets.MultiSelect(
     name="Version",
-    options=settings.VERSIONS,
+    options={m: settings.VERSIONS[m] for m in MODELS},
     sizing_mode="stretch_width",
     size=6,
 )
@@ -44,9 +51,12 @@ def _get_stats(versions_val: list[str], metrics_val: list[str]) -> pd.DataFrame:
 
 def _plot_metric(stats: pd.DataFrame, metric: str) -> hv.BoxWhisker:
     plot = stats.hvplot.box(y=metric, by="version")
+    range_ = get_metric_range(metric)
+
     plot = plot.opts(
         ylabel="",
         invert_axes=True,
+        ylim=range_,
         title=metric,
         show_grid=True,
         tools=["hover"],
@@ -76,6 +86,7 @@ def show_metrics(versions_val: list[str], metrics_val: list[str]):
     if not metrics_val:
         metrics_val = list(settings.METRICS.values())
     stats = _get_stats(versions_val=versions_val, metrics_val=metrics_val)
+    stats["version"] = stats.version.apply(lambda x: folders_to_models([x])[0])
     plots = []
     for metric in metrics_val:
         plots.extend(

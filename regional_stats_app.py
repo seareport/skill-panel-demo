@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import glob
 import logging
 
 import colorcet as cc
@@ -13,17 +14,24 @@ from seareport_skill import assign_oceans
 from seareport_skill import load_countries
 from seareport_skill import load_model_stats
 from seareport_skill import settings
-from utils.hists import hist_
-from utils.hists import scatter_plot
+from utils.plots import hist_
+from utils.plots import scatter_plot
 from utils.taylor import taylor_diagram
+from utils.tools import folders_to_models
 
 logging.basicConfig(level=10)
 logger = logging.getLogger()
 
 pn.extension("mathjax")
 
+OBS_FOLDER = "./01_obs"
+folders = sorted(list(glob.glob(OBS_FOLDER + "/model/*")))
+MODELS = folders_to_models(folders)
+
 version = pn.widgets.Select(
-    name="Version", options=settings.VERSIONS, sizing_mode="stretch_width"
+    name="Version",
+    options={m: settings.VERSIONS[m] for m in MODELS},
+    sizing_mode="stretch_width",
 )
 metrics = pn.widgets.Select(
     name="Metrics", options=settings.METRICS, sizing_mode="stretch_width"
@@ -169,7 +177,6 @@ template = pn.template.MaterialTemplate(
         metrics,
         type_select,
         display_selector,
-        pn.pane.Markdown(settings.METRICS_DOC),
     ],
     sidebar_width=430,
     main=pn.Column(
@@ -177,4 +184,14 @@ template = pn.template.MaterialTemplate(
         map_plot,
     ),
 )
+template.modal.append(settings.CONTENT)
+modal_btn = pn.widgets.Button(name="More information about the metrics")
+
+
+def about_callback(event):
+    template.open_modal()
+
+
+modal_btn.on_click(about_callback)
+template.sidebar.append(modal_btn)
 template.servable()

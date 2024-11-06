@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import colorcet as cc
+import panel as pn
 
 # Constants and configuration
 SURGE_FOLDER = "./obs/surge/"
@@ -8,11 +9,47 @@ STATS_JSON = "assets/stats_all.json"
 TMIN = "2023-01-01"
 TMAX = "2023-12-31"
 VERSIONS = {
-    "Global 50km": "v0.0",
-    "Global 20km": "v0.2",
-    "Global 7km": "v1.2",
-    "Global 3km, L5 GSSHS": "v2.1",
-    "Global 3km, L6 GSSHS": "v2.2",
+    "OM 50km": "v0.0",
+    "OM 20km": "v0.2",
+    "OM 7km": "v1.2",
+    "OM 7km, m 0.020": "v1.2_m0.020",
+    "OM 7km, m 0.025": "v1.2_m0.025",
+    "OM 7km, m 0.030": "v1.2_m0.030",
+    "OM 7km - O1280": "v1.2_ope",
+    "JIGSAW 6km": "v1.5",
+    "OM 3km, L5": "v2.1",
+    "OM 3km": "v2.2",
+    "OM 3km, m 0.020": "v2.2_m0.020",
+    "OM 3km, m 0.025": "v2.2_m0.025",
+    "OM 3km, m 0.030": "v2.2_m0.030",
+    "OM 3km - 01280": "v2.2_ope",
+    "JIGSAW 3km": "v2.3",
+    "JIGSAW 3km - O1280": "v2.3_ope",
+    "JIGSAW 2km": "v3.0",
+    "CMEMS PHY_001_024": "cmems",
+    "Stofs 2D": "stofs2d",
+}
+
+MESHES = {
+    "v0.0": "v0.0",
+    "v0.2": "v0.2",
+    "v1.2": "v1.2",
+    "v1.2_m0.020": "v1.2",
+    "v1.2_m0.025": "v1.2",
+    "v1.2_m0.030": "v1.2",
+    "v1.2_ope": "v1.2",
+    "v1.5": "v1.5",
+    "v2.1": "v2.1",
+    "v2.2": "v2.2",
+    "v2.2_m0.020": "v2.2",
+    "v2.2_m0.025": "v2.2",
+    "v2.2_m0.030": "v2.2",
+    "v2.2_ope": "v2.2",
+    "v2.3": "v2.3",
+    "v2.3_ope": "v2.3",
+    "v3.0": "v3.0",
+    "stofs2d": "v0.0",
+    "cmems": "v0.0",
 }
 
 PLOT_OPTS = {
@@ -31,7 +68,7 @@ METRICS = {
     "Root Mean Square [m]": "rms",
     "Root Mean Square >95th percentile": "rms_95",
     "Bias [m]": "bias",
-    "Kling-Guplta efficiency": "kge",
+    "Kling-Gupta efficiency": "kge",
     "Nash-Sutcliffe model efficiency": "nse",
     "Lamba index": "lamba",
     "Slope": "slope",
@@ -61,22 +98,6 @@ METRICS_SPIDER = {
     "Error on peaks >95th percentile [m]": "error95m",
     "Error on peaks >99th percentile [m]": "error99m",
 }
-
-OCEANS_SPIDER = [
-    "North Pacific Ocean",
-    "South Pacific Ocean",
-    "North Atlantic Ocean US",
-    "English Channel",
-    "North Sea",
-    "Bay of Biscay",
-    "Mediterranean Sea",
-    "South Atlantic Ocean",
-    "INDIAN OCEAN",
-    "Sea of Japan",
-    "Yellow Sea",
-    "North Atlantic Ocean EU",
-]
-
 
 TYPE_SELECT = {
     "Oceans": "ocean",
@@ -108,13 +129,15 @@ SECTORS = [
     "North Western Passages",
     "Hudson Bay",
     "NW Atlantic",
-    "Gulf of Mexico" "Caribbean Sea",
+    "Gulf of Mexico",
+    "Caribbean Sea",
     "NE Atlantic",
     "Irish Sea",
     "English Channel",
     "North Sea",
     "Baltic Sea",
-    "Bay of Biscay" "Adriatic Sea",
+    "Bay of Biscay",
+    "Adriatic Sea",
     "Mediterranean Sea",
     "Aegean Sea",
     "Sea of Marmara",
@@ -195,6 +218,8 @@ this happens when the function `storms/match_extremes.py` couldn't finc concomit
 more info can be found [in this preprint](https://doi.org/10.5194/egusphere-2024-1415) from Campos-Caba et. al.
 """
 
+CONTENT = pn.pane.Markdown(METRICS_DOC)
+
 TABULATOR_CSS = """
 .tabulator-cell {
     font-size: 10px;
@@ -233,6 +258,7 @@ TABULATOR_FORMATTER = {
     "R3": {"type": "progress", "min": 0, "max": 0.5, "color": cc.CET_R4},
     "error95m": {"type": "progress", "min": 0, "max": 0.5, "color": cc.CET_R4},
     "error99m": {"type": "progress", "min": 0, "max": 0.5, "color": cc.CET_R4},
+    "error": {"type": "progress", "min": 0, "max": 0.5, "color": cc.CET_R4},
 }
 
 TABULATOR_CONFIG = {}
