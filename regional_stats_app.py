@@ -24,9 +24,8 @@ logger = logging.getLogger()
 
 pn.extension("mathjax")
 
-OBS_FOLDER = "./01_obs"
-folders = sorted(list(glob.glob(OBS_FOLDER + "/model/*")))
-MODELS = folders_to_models(folders)
+folders = sorted(list(glob.glob(settings.OBS_FOLDER + "/model/*")))
+MODELS = folders_to_models(folders, settings.VERSIONS)
 
 version = pn.widgets.Select(
     name="Version",
@@ -34,7 +33,13 @@ version = pn.widgets.Select(
     sizing_mode="stretch_width",
 )
 metrics = pn.widgets.Select(
-    name="Metrics", options=settings.METRICS, sizing_mode="stretch_width"
+    name="Metrics",
+    options={
+        m: settings.METRICS[m]
+        for m in set(list(settings.METRICS.keys()))
+        - set(["Error on peaks > threshold [m]"])
+    },
+    sizing_mode="stretch_width",
 )
 type_select = pn.widgets.Select(
     name="Choose Type of Selection",

@@ -11,8 +11,8 @@ import pandas as pd
 import panel as pn
 import thalassa
 from pyextremes import get_extremes
+from seastats import get_stats
 from seastats.stats import align_ts
-from seastats.stats import get_stats
 from seastats.storms import match_extremes
 
 from seareport_skill import DashboardTS
@@ -31,9 +31,8 @@ pn.extension("mathjax")
 pn.extension("tabulator")
 
 
-OBS_FOLDER = "./01_obs"
-folders = sorted(list(glob.glob(OBS_FOLDER + "/model/*")))
-MODELS = folders_to_models(folders)
+folders = sorted(list(glob.glob(settings.OBS_FOLDER + "/model/*")))
+MODELS = folders_to_models(folders, settings.VERSIONS)
 
 if len(MODELS) > 0:
     DEFAULT_VAL = MODELS[0]
@@ -74,6 +73,16 @@ show_bathy = pn.widgets.Checkbox(
     name="Show Bathymetry", value=False, sizing_mode="stretch_width"
 )
 
+start_date = pn.widgets.DatePicker(
+    name="Start Date",
+    value=pd.Timestamp(2022, 1, 1),  # Default to today, adjust as needed
+    sizing_mode="stretch_width",
+)
+
+end_date = pn.widgets.DatePicker(
+    name="End Date", value=pd.Timestamp(2024, 1, 1), sizing_mode="stretch_width"
+)
+
 map_view = {
     "width": 700,
     "height": 500,
@@ -97,6 +106,8 @@ if pn.state.location:
     pn.state.location.sync(station, {"value": station.name})
     pn.state.location.sync(quantile, {"value": quantile.name})
     pn.state.location.sync(show_colors, {"value": show_colors.name})
+    pn.state.location.sync(start_date, {"value": start_date.name})
+    pn.state.location.sync(end_date, {"value": end_date.name})
 
 
 def load_parquet(folder, id):
@@ -177,8 +188,15 @@ def specs_mesh(version_val):
     )
 
 
-@pn.depends(v_plot, station.param.value, quantile, show_colors)
-def update_panels(version_plot_val, station_val, quantile_val, show_colors_val):
+@pn.depends(v_plot, station.param.value, quantile, show_colors, start_date, end_date)
+def update_panels(
+    version_plot_val,
+    station_val,
+    quantile_val,
+    show_colors_val,
+    start_date_val,
+    end_date_val,
+):
     if not station_val:
         emp_ = pd.DataFrame()
         empty_ts = plot_extreme_raster(emp_, emp_).opts(**ts_view)
@@ -189,8 +207,9 @@ def update_panels(version_plot_val, station_val, quantile_val, show_colors_val):
         return ts_pane_empty, sc_pane_empty, df_pane_empty
     else:
         ## get observations
-        obs = load_parquet(OBS_FOLDER + "/surge", station_val).dropna()
+        obs = load_parquet(settings.OBS_FOLDER + "/surge", station_val).dropna()
         obs = obs[obs.columns[0]]
+        obs = obs.loc[start_date_val:end_date_val]
         # get observed extremes
         ext = get_extremes(
             obs, "POT", threshold=obs.quantile(quantile_val), r=f"{db.CLUSTER_H}h"
@@ -204,7 +223,7 @@ def update_panels(version_plot_val, station_val, quantile_val, show_colors_val):
         )
         obs_plot *= plot_extreme_raster(obs1h, ext1h, color="grey", label="observed")
 
-        folders = models_to_folders(version_plot_val)
+        folders = models_to_folders(version_plot_val, settings.VERSIONS)
         df_stats = pd.DataFrame()
         for im, model_version_folder in enumerate(folders):
             model_ = version_plot_val[im]
@@ -212,6 +231,7 @@ def update_panels(version_plot_val, station_val, quantile_val, show_colors_val):
             if model_ == "Stofs 2D":
                 sim = sim - sim.mean()
             sim = sim[sim.columns[0]]
+            sim = sim.loc[start_date_val:end_date_val]
             ext_df = match_extremes(sim, obs, quantile_val, cluster=72)
             # subset if event selected
             sim_, obs_ = align_ts(sim, obs)
@@ -220,17 +240,6 @@ def update_panels(version_plot_val, station_val, quantile_val, show_colors_val):
             stats["R3"] = ext_df["error"].iloc[0:3].mean()
             stats["error"] = ext_df["error"].mean()
             stats_ = pd.DataFrame(stats, index=[model_])
-            stats_ = stats_.drop(
-                columns=[
-                    "sim_mean",
-                    "obs_mean",
-                    "sim_std",
-                    "obs_std",
-                    "mad",
-                    "madp",
-                    "madc",
-                ]
-            )
             df_stats = pd.concat([df_stats, stats_], axis=0)
 
             ext_temp = pd.DataFrame(
@@ -299,7 +308,12 @@ df_column = pn.Column()
 
 def update_all(event=None):
     ts_pane, sc_pane, df_pane = update_panels(
-        v_plot.value, station.value, quantile.value, show_colors.value
+        v_plot.value,
+        station.value,
+        quantile.value,
+        show_colors.value,
+        start_date.value,
+        end_date.value,
     )
     # Clear the existing contents and update with new panes
     time_series_column.clear()
@@ -329,6 +343,8 @@ template = pn.template.BootstrapTemplate(
         station,
         quantile,
         show_colors,
+        start_date,
+        end_date,
     ],
     sidebar_width=sidebar_width,
     main=pn.Column(

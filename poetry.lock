@@ -3012,7 +3012,7 @@ name = "seastats"
 version = "0.1.0"
 description = "package for metocean statistics"
 optional = false
-python-versions = "^3.9"
+python-versions = "^3.10"
 files = []
 develop = false
 
@@ -3027,9 +3027,9 @@ xarray = "*"
 
 [package.source]
 type = "git"
-url = "https://github.com/seareport/seastats"
+url = "https://github.com/oceanmodeling/seastats.git"
 reference = "HEAD"
-resolved_reference = "778479a58df4f6f206ea1ce1659d3f610c2e4766"
+resolved_reference = "bda9c00cc485e573953e5de53c147094b365b2e9"
 
 [[package]]
 name = "shapely"
@@ -3690,4 +3690,4 @@ test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", 
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "00036ef7e104709c206218ce32811df589df50116c9596f0c78459d611f0703c"
+content-hash = "cfec0b9ca4f2c1dbb397dc58b7b9a4769a1c47d71780c7c6345346acee8f4f7b"

@@ -1,25 +1,20 @@
-from seareport_skill import settings
+def value_to_key(value, dict_):
+    return list(dict_.keys())[list(dict_.values()).index(value)]
 
 
-def key_to_name(key):
-    return list(settings.VERSIONS.keys())[list(settings.VERSIONS.values()).index(key)]
+def key_to_value(key, dict_):
+    return dict_[key]
 
 
-def name_to_key(name):
-    return settings.VERSIONS[name]
-
-
-def folders_to_models(folders):
+def folders_to_models(folders, dict_):
     return [
-        list(settings.VERSIONS.keys())[
-            list(settings.VERSIONS.values()).index(f.split("/")[-1])
-        ]
+        list(dict_.keys())[list(dict_.values()).index(f.split("/")[-1])]
         for f in folders
     ]
 
 
-def models_to_folders(models):
-    return ["./01_obs/model/" + settings.VERSIONS[m] for m in models]
+def models_to_folders(models, dict_):
+    return ["./01_obs/model/" + dict_[m] for m in models]
 
 
 def get_metric_range(metric: str):

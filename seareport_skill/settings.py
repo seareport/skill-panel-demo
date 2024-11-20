@@ -4,6 +4,7 @@ import colorcet as cc
 import panel as pn
 
 # Constants and configuration
+OBS_FOLDER = "./01_obs"
 SURGE_FOLDER = "./obs/surge/"
 TMIN = "2023-01-01"
 TMAX = "2023-12-31"
@@ -76,14 +77,9 @@ METRICS = {
     "Correlation Coefficient >95th percentile": "cr_95",
     "Mean Absolute deviation": "mad",
     "Mean Absolute deviation of percentiles": "madp",
-    "Normalized error on highest peak": "R1_norm",
-    "Normalized error on 3 highest peaks": "R3_norm",
-    "Normalized error on peaks >95th percentile": "error95",
-    "Normalized error on peaks >99th percentile": "error99",
     "Error on highest peak [m]": "R1",
     "Error on 3 highest peaks [m]": "R3",
-    "Error on peaks >95th percentile [m]": "error95m",
-    "Error on peaks >99th percentile [m]": "error99m",
+    "Error on peaks > threshold [m]": "error",
 }
 
 METRICS_SPIDER = {

@@ -22,7 +22,7 @@ watchfiles = "*"
 ipykernel = "*"
 geodatasets = "*"
 pyextremes = "^2.3.2"
-seastats = {git = "https://github.com/seareport/seastats"}
+seastats = {git = "https://github.com/oceanmodeling/seastats.git"}
 xarray-selafin = "^0.1.8"
 seareport-data = "^0.1.0"
 

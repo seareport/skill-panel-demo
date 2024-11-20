@@ -19,9 +19,8 @@ logger = logging.getLogger()
 
 pn.extension()
 
-OBS_FOLDER = "./01_obs"
-folders = sorted(list(glob.glob(OBS_FOLDER + "/model/*")))
-MODELS = folders_to_models(folders)
+folders = sorted(list(glob.glob(settings.OBS_FOLDER + "/model/*")))
+MODELS = folders_to_models(folders, settings.VERSIONS)
 
 versions = pn.widgets.MultiSelect(
     name="Version",
@@ -29,9 +28,14 @@ versions = pn.widgets.MultiSelect(
     sizing_mode="stretch_width",
     size=6,
 )
+
 metrics = pn.widgets.MultiSelect(
     name="Metrics",
-    options=settings.METRICS,
+    options={
+        m: settings.METRICS[m]
+        for m in set(list(settings.METRICS.keys()))
+        - set(["Error on peaks > threshold [m]"])
+    },
     sizing_mode="stretch_width",
     size=15,
 )
@@ -85,8 +89,11 @@ def show_metrics(versions_val: list[str], metrics_val: list[str]):
         versions_val = list(settings.VERSIONS.values())
     if not metrics_val:
         metrics_val = list(settings.METRICS.values())
+        metrics_val = list(set(metrics_val) - set(["error"]))  # remove "error" for now
     stats = _get_stats(versions_val=versions_val, metrics_val=metrics_val)
-    stats["version"] = stats.version.apply(lambda x: folders_to_models([x])[0])
+    stats["version"] = stats.version.apply(
+        lambda x: folders_to_models([x], settings.VERSIONS)[0]
+    )
     plots = []
     for metric in metrics_val:
         plots.extend(

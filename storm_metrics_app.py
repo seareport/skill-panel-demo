@@ -12,8 +12,8 @@ import pandas as pd
 import panel as pn
 from holoviews import opts
 from pyextremes import get_extremes
+from seastats import get_stats
 from seastats.stats import align_ts
-from seastats.stats import get_stats
 from seastats.storms import match_extremes
 
 from seareport_skill import DashboardTS
@@ -35,9 +35,8 @@ pn.extension("mathjax")
 pn.extension("tabulator")
 
 # GLOBAL VARIABLES
-OBS_FOLDER = "./01_obs"
-folders = sorted(list(glob.glob(OBS_FOLDER + "/model/*")))
-MODELS = folders_to_models(folders)
+folders = sorted(list(glob.glob(settings.OBS_FOLDER + "/model/*")))
+MODELS = folders_to_models(folders, settings.VERSIONS)
 
 if len(MODELS) > 0:
     DEFAULT_VAL = MODELS[0]
@@ -99,6 +98,16 @@ quantile = pn.widgets.FloatInput(
     name="Quantile", value=0.95, step=1e-3, start=0, end=1, sizing_mode="stretch_width"
 )
 
+start_date = pn.widgets.DatePicker(
+    name="Start Date",
+    value=pd.Timestamp(2022, 1, 1),  # Default to today, adjust as needed
+    sizing_mode="stretch_width",
+)
+
+end_date = pn.widgets.DatePicker(
+    name="End Date", value=pd.Timestamp(2024, 1, 1), sizing_mode="stretch_width"
+)
+
 # UPDATE URL
 if pn.state.location:
     pn.state.location.sync(version, {"value": version.name})
@@ -106,6 +115,8 @@ if pn.state.location:
     pn.state.location.sync(station, {"value": station.name})
     pn.state.location.sync(quantile, {"value": quantile.name})
     pn.state.location.sync(show_colors, {"value": show_colors.name})
+    pn.state.location.sync(start_date, {"value": start_date.name})
+    pn.state.location.sync(end_date, {"value": end_date.name})
 
 
 def update_station_from_map(index):
@@ -210,7 +221,7 @@ def subset_signal(df, itime=None):
 @pn.depends(quantile, station.param.value)
 def threshold_value(quantile_val, station_val):
     if quantile_val and station_val:
-        obs = load_parquet(OBS_FOLDER + "/surge", station_val).dropna()
+        obs = load_parquet(settings.OBS_FOLDER + "/surge", station_val).dropna()
         obs = obs[obs.columns[0]]
         threshold = np.round(obs.quantile(quantile_val), 3)
         return pn.pane.Markdown(f"Corresponding physical threshold: {threshold}m MSL")
@@ -218,9 +229,15 @@ def threshold_value(quantile_val, station_val):
         return pn.pane.Markdown("Corresponding physical threshold: N/A")
 
 
-@pn.depends(v_plot, station.param.value, quantile, show_colors)
+@pn.depends(v_plot, station.param.value, quantile, show_colors, start_date, end_date)
 def time_series_plots(
-    version_plot_val, station_val, quantile_val, show_colors_val, event_time=None
+    version_plot_val,
+    station_val,
+    quantile_val,
+    show_colors_val,
+    start_date_val,
+    end_date_val,
+    event_time=None,
 ):
     db.COUNT = 0
     if not station_val:
@@ -244,8 +261,9 @@ def time_series_plots(
         )
     else:
         ## get observations
-        obs = load_parquet(OBS_FOLDER + "/surge", station_val).dropna()
+        obs = load_parquet(settings.OBS_FOLDER + "/surge", station_val).dropna()
         obs = obs[obs.columns[0]]
+        obs = obs.loc[start_date_val:end_date_val]
         # get observed extremes
         ext = get_extremes(
             obs, "POT", threshold=obs.quantile(quantile_val), r=f"{db.CLUSTER_H}h"
@@ -263,7 +281,7 @@ def time_series_plots(
             snippet_obs, ext, color="grey", label="observed"
         )
 
-        folders = models_to_folders(version_plot_val)
+        folders = models_to_folders(version_plot_val, settings.VERSIONS)
         df_stats = pd.DataFrame()
         ext_df_all = pd.DataFrame()
         window = db.CLUSTER_H // 2  # Assuming cluster_duration is in hours
@@ -273,6 +291,7 @@ def time_series_plots(
             if model_ == "Stofs 2D":
                 sim = sim - sim.mean()
             sim = sim[sim.columns[0]]
+            sim = sim.loc[start_date_val:end_date_val]
             ext_df = match_extremes(sim, obs, quantile_val, cluster=72)
             # subset if event selected
             sim = subset_signal(sim, event_time)
@@ -282,17 +301,6 @@ def time_series_plots(
             stats["R3"] = ext_df["error"].iloc[0:3].mean()
             stats["error"] = ext_df["error"].mean()
             stats_ = pd.DataFrame(stats, index=[model_])
-            stats_ = stats_.drop(
-                columns=[
-                    "sim_mean",
-                    "obs_mean",
-                    "sim_std",
-                    "obs_std",
-                    "mad",
-                    "madp",
-                    "madc",
-                ]
-            )
             df_stats = pd.concat([df_stats, stats_], axis=0)
 
             # prepare time series plots
@@ -447,6 +455,8 @@ def update_time_series_column(event=None, event_time=None):
         station.value,
         quantile.value,
         show_colors.value,
+        start_date.value,
+        end_date.value,
         event_time=event_time,
     )
     # Clear the existing contents and update with new panes
@@ -475,7 +485,10 @@ def add_widget_watchers(widgets: list, callback: callable) -> None:
         widget.param.watch(callback, "value")
 
 
-add_widget_watchers([v_plot, station, quantile, show_colors], update_time_series_column)
+add_widget_watchers(
+    [v_plot, station, quantile, show_colors, start_date, end_date],
+    update_time_series_column,
+)
 version.param.watch(update_stats, "value")
 
 template = pn.template.BootstrapTemplate(
@@ -488,6 +501,8 @@ template = pn.template.BootstrapTemplate(
         quantile,
         threshold_value,
         show_colors,
+        start_date,
+        end_date,
     ],
     sidebar_width=sidebar_width,
     main=pn.Column(

@@ -12,8 +12,9 @@ import shapely.geometry
 import thalassa
 from thalassa import api
 
+import seareport_skill.settings as settings
 from seareport_skill.settings import MESHES
-from utils.tools import name_to_key
+from utils.tools import key_to_value
 
 __all__: list[str] = [
     "load_countries",
@@ -98,7 +99,7 @@ class DashboardTS:
         if default_model is None:
             self.VERSION = ""
         else:
-            self.VERSION = name_to_key(default_model)
+            self.VERSION = key_to_value(default_model, settings.VERSIONS)
         self.STATS = load_model_stats(self.VERSION)
         self.STATS["id"] = self.STATS.index
         self.MESH_ = thalassa.plot_mesh(load_mesh(self.VERSION))
